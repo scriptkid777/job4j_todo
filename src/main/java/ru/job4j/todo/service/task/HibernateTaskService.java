@@ -17,7 +17,6 @@ public class HibernateTaskService implements TaskService {
 
     private final  TaskRepository hibernateTaskRepository;
 
-
     @Override
     public Task create(Task task) {
         return hibernateTaskRepository.create(task);
@@ -29,8 +28,8 @@ public class HibernateTaskService implements TaskService {
     }
 
     @Override
-    public void deleteById(Integer id) {
-        hibernateTaskRepository.deleteById(id);
+    public boolean deleteById(Integer id) {
+       return hibernateTaskRepository.deleteById(id);
     }
 
     @Override
@@ -54,8 +53,7 @@ public class HibernateTaskService implements TaskService {
     }
 
     @Override
-    public void complete(Task task) {
-        task.setDone(true);
-        hibernateTaskRepository.update(task);
+    public boolean changeStatus(Integer id) {
+        return hibernateTaskRepository.changeStatus(id);
     }
 }

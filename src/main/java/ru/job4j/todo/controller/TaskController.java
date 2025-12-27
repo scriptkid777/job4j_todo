@@ -65,23 +65,22 @@ public class TaskController {
 
     @GetMapping("/complete/{id}")
     public String done(Model model, @PathVariable("id") Integer id) {
-        var taskOptional = hibernateTaskService.findById(id);
-        if (taskOptional.isEmpty()) {
+        boolean isUpdated = hibernateTaskService.changeStatus(id);
+        if (!isUpdated) {
             model.addAttribute("message", "Задание не найдено");
             return "errors/error";
         }
-        hibernateTaskService.complete(taskOptional.get());
         return "redirect:/tasks";
     }
 
 
     @GetMapping("/delete/{id}")
     public String delete(Model model, @PathVariable("id") Integer id) {
-        if (hibernateTaskService.findById(id).isEmpty()) {
+        boolean isDeleted = hibernateTaskService.deleteById(id);
+        if (!isDeleted) {
             model.addAttribute("message", "Задание не найдено");
             return "errors/error";
         }
-        hibernateTaskService.deleteById(id);
         return "redirect:/tasks";
     }
 

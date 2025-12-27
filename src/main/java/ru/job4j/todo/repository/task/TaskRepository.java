@@ -10,7 +10,7 @@ public interface TaskRepository {
 
     boolean update(Task task);
 
-    void deleteById(Integer id);
+    boolean deleteById(Integer id);
 
     Optional<Task> findById(Integer id);
 
@@ -19,4 +19,6 @@ public interface TaskRepository {
     Collection<Task> findNew();
 
     Collection<Task> findCompleted();
+
+    boolean changeStatus(Integer id);
 }
