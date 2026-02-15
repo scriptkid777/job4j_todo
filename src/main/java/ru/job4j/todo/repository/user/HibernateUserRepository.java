@@ -2,6 +2,7 @@ package ru.job4j.todo.repository.user;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Repository;
 import ru.job4j.todo.model.User;
 import org.hibernate.SessionFactory;
@@ -22,7 +23,7 @@ public class HibernateUserRepository implements UserRepository {
             session.save(user);
             session.getTransaction().commit();
             return Optional.of(user);
-        } catch (Exception e) {
+        } catch (ConstraintViolationException e) {
             session.getTransaction().rollback();
             log.error(e.getMessage(), e);
         } finally {
