@@ -21,8 +21,12 @@ public class TaskController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute Task task) {
-        hibernateTaskService.create(task);
+    public String create(@ModelAttribute Task task, Model model) {
+        var savedTask = hibernateTaskService.create(task);
+        if (savedTask.isEmpty()) {
+            model.addAttribute("message", "Не удалось создать задачу");
+            return "errors/error";
+        }
         return "redirect:/tasks";
     }
 

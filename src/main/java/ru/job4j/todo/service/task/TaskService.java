@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface TaskService {
-    Task create(Task task);
+    Optional<Task> create(Task task);
 
     boolean update(Task task);
 

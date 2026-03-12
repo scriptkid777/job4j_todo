@@ -1,167 +1,85 @@
 package ru.job4j.todo.repository.task;
 
 import lombok.AllArgsConstructor;
-import org.hibernate.SessionFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.job4j.todo.model.Task;
-
+import ru.job4j.todo.repository.CrudRepository;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+@Slf4j
 @Repository
 @AllArgsConstructor
 public class HibernateTaskRepository implements TaskRepository {
 
-    private final SessionFactory sf;
+    private final CrudRepository crudRepository;
 
-    @Override
-    public Task create(Task task) {
-        var session = sf.openSession();
+
+    public Optional<Task> create(Task task) {
         try {
-            session.beginTransaction();
-            session.save(task);
-            session.getTransaction().commit();
+            crudRepository.run(session -> session.persist(task));
+            return Optional.of(task);
         } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
+            log.error(e.getMessage(), e);
         }
-        return task;
+        return Optional.empty();
     }
 
     @Override
     public boolean update(Task task) {
-        var session = sf.openSession();
-        boolean isUpdated = false;
         try {
-         session.beginTransaction();
-           isUpdated = session.createQuery("""
-                    UPDATE Task SET title = :title, description = :description, done = :done
-                    WHERE id = :id
-                    """)
-                    .setParameter("title", task.getTitle())
-                    .setParameter("description", task.getDescription())
-                    .setParameter("done", task.isDone())
-                   .setParameter("id", task.getId())
-           .executeUpdate() > 0;
-            session.getTransaction().commit();
+       crudRepository.run(session -> session.merge(task));
+       return true;
         } catch (Exception e) {
-            session.getTransaction().rollback();
+            log.error(e.getMessage(), e);
             e.printStackTrace();
-        } finally {
-            session.close();
         }
-        return isUpdated;
+        return false;
     }
 
 
     public boolean  changeStatus(Integer id) {
-        var session = sf.openSession();
-        boolean isUpdated = false;
-        try {
-            session.beginTransaction();
-            isUpdated = session.createQuery(
-                            "UPDATE Task SET done = true WHERE id = :id"
-                    )
-                    .setParameter("id", id)
-                    .executeUpdate() > 0;
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return isUpdated;
+         return crudRepository.executeUpdate(
+                "UPDATE Task SET done = true WHERE id = :id",
+                Map.of("id", id)
+        );
     }
 
 
     @Override
     public boolean deleteById(Integer id) {
-        var session = sf.openSession();
-        boolean isDeleted = false;
-        try {
-            session.beginTransaction();
-            isDeleted = session.createQuery("DELETE Task WHERE id = :id")
-                    .setParameter("id", id)
-                    .executeUpdate() > 0;
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return isDeleted;
+        return crudRepository.executeUpdate(
+                "DELETE Task WHERE id = :id",
+                Map.of("id", id)
+        );
     }
 
     @Override
     public Optional<Task> findById(Integer id) {
-        var session = sf.openSession();
-        Optional<Task> optionalTask = Optional.empty();
-        try {
-            session.beginTransaction();
-            optionalTask = session.createQuery("FROM Task WHERE id = :id", Task.class)
-                    .setParameter("id", id)
-                    .uniqueResultOptional();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return optionalTask;
+        return crudRepository.optional(
+                "FROM Task WHERE id = :id",
+                Task.class,
+                Map.of("id", id)
+        );
     }
 
     @Override
     public Collection<Task> findAll() {
-        var session = sf.openSession();
-        List<Task> tasks = new ArrayList<>();
-        try {
-            session.beginTransaction();
-            tasks = session.createQuery("FROM Task", Task.class).list();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return tasks;
+      return crudRepository.query("FROM Task" ,Task.class);
     }
 
     @Override
     public Collection<Task> findNew() {
-        var session = sf.openSession();
-        List<Task> tasks = new ArrayList<>();
-        var today = LocalDate.now().atStartOfDay();
-        try {
-            session.beginTransaction();
-            tasks = session.createQuery("FROM Task WHERE created >= :today", Task.class)
-                    .setParameter("today", today)
-                    .list();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return tasks;
+        return crudRepository.query(
+                "FROM Task WHERE created >= :today",
+                Task.class,
+                Map.of("today", LocalDate.now().atStartOfDay())
+        );
     }
 
     @Override
     public Collection<Task> findCompleted() {
-        var session = sf.openSession();
-        List<Task> tasks = new ArrayList<>();
-        try {
-            session.beginTransaction();
-            tasks = session.createQuery("FROM Task WHERE done = true", Task.class).list();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return tasks;
+    return crudRepository.query("FROM Task WHERE done = true", Task.class);
     }
 }
