@@ -7,7 +7,10 @@ import org.springframework.ui.Model;
 
 
 import ru.job4j.todo.model.Task;
+import ru.job4j.todo.model.User;
 import ru.job4j.todo.service.task.TaskService;
+
+import javax.servlet.http.HttpSession;
 
 @Controller
 @AllArgsConstructor
@@ -21,7 +24,9 @@ public class TaskController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute Task task, Model model) {
+    public String create(@ModelAttribute Task task, Model model, HttpSession session) {
+        var user = (User) session.getAttribute("user");
+        task.setUser(user);
         var savedTask = hibernateTaskService.create(task);
         if (savedTask.isEmpty()) {
             model.addAttribute("message", "Не удалось создать задачу");

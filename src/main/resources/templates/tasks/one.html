@@ -20,8 +20,12 @@
                 <span><h3 th:text="${task.title}"/></span>
                 <span class="text-secondary">Дата создания: </span>
                 <span th:text="${#temporals.format(task.created, 'dd.MM.yyyy HH:mm')}"/>
-                <br>
+
             </div>
+        </div>
+        <div class="mb-3">
+            <span class="text-secondary">Имя пользователя: </span>
+            <span th:text="${task.user.name}"/>
         </div>
         <div class="mb-3">
             <div class="text-secondary">Описание:</div>
