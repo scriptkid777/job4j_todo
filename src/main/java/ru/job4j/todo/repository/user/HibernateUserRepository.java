@@ -17,7 +17,12 @@ public class HibernateUserRepository implements UserRepository {
 
     @Override
     public Optional<User> save(User user) {
+        try {
        crudRepository.run(session -> session.persist(user));
+       return Optional.of(user);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
        return Optional.empty();
     }
 
