@@ -20,6 +20,12 @@
                 <input type="text" class="form-control" id="title" name="title" placeholder="Введите название">
             </div>
             <div class="mb-3">
+                <label for="priorityId"><b>Приоритет</b></label>
+                <select class="form-control" id="priorityId" name="priorityId">
+                    <option th:each="priority : ${priorities}" th:value="${priority.id}" th:text="${priority.name}"></option>
+                </select>
+            </div>
+            <div class="mb-3">
                 <label for="description" class="form-label"><b>Описание</b></label>
                 <textarea class="form-control" id="description" name="description" rows="5" placeholder="Описание задачи"></textarea>
             </div>

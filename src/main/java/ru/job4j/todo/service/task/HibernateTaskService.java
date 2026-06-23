@@ -2,7 +2,10 @@ package ru.job4j.todo.service.task;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.job4j.todo.dto.TaskDto;
+import ru.job4j.todo.mappers.TaskMapper;
 import ru.job4j.todo.model.Task;
+import ru.job4j.todo.repository.priority.PriorityRepository;
 import ru.job4j.todo.repository.task.HibernateTaskRepository;
 import ru.job4j.todo.repository.task.TaskRepository;
 
@@ -16,15 +19,17 @@ import java.util.Optional;
 public class HibernateTaskService implements TaskService {
 
     private final  TaskRepository hibernateTaskRepository;
+    private final PriorityRepository hibernatePriorityRepository;
+    private final TaskMapper taskMapper;
 
     @Override
-    public Optional<Task> create(Task task) {
-        return hibernateTaskRepository.create(task);
+    public Optional<Task> create(TaskDto taskDto) {
+        return hibernateTaskRepository.create(getTaskFromTaskDto(taskDto));
     }
 
     @Override
-    public boolean update(Task task) {
-        return hibernateTaskRepository.update(task);
+    public boolean update(TaskDto taskDto) {
+        return hibernateTaskRepository.update(getTaskFromTaskDto(taskDto));
     }
 
     @Override
@@ -55,5 +60,12 @@ public class HibernateTaskService implements TaskService {
     @Override
     public boolean changeStatus(Integer id) {
         return hibernateTaskRepository.changeStatus(id);
+    }
+
+    private Task getTaskFromTaskDto(TaskDto taskDto) {
+        Task task = taskMapper.toTask(taskDto);
+        var priority = hibernatePriorityRepository.findById(taskDto.getPriorityId()).orElseThrow();
+        task.setPriority(priority);
+        return task;
     }
 }

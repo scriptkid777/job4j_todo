@@ -24,6 +24,7 @@
                     <th scope="col">Название</th>
                     <th scope="col">Дата создания</th>
                     <th scope="col">Статус</th>
+                    <th scope="col">Приоритет</th>
                     <th scope="col">Имя пользователя</th>
                 </tr>
                 </thead>
@@ -39,6 +40,7 @@
                             <i class="bi bi-square"></i>
                         </span>
                     </td>
+                    <td th:text="${task.priority.name}"/>
                     <td th:text="${task.user.name}"/>
                 </tr>
                 </tbody>
